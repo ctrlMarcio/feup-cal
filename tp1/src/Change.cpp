@@ -32,29 +32,9 @@ string calcChange(int m, int numCoins, int *coinValues) {
 		currentValue++;
 	}
 
-	vector<int> selectedCoinValues;
-
-	int index = m;
-
-	while (index > 0) {
-		int selectedCoinIndex = lastCoin[index];
-
-		if (selectedCoinIndex <= 0) // It is impossible
-			return "-";
-
-		int value = coinValues[selectedCoinIndex - 1];
-		selectedCoinValues.push_back(value);
-		index -= value;
-	}
-
-	string res;
-	for (int v : selectedCoinValues)
-		res = res + to_string(v) + ";";
-
-	return res;
+	return getDescriptiveString(m, coinValues, lastCoin);
 }
 
-// TODO not working?, all code in the big function instead
 string getDescriptiveString(int m, int *coinValues, int *lastCoin) {
 	vector<int> selectedCoinValues;
 
