@@ -47,6 +47,10 @@ TEST(CAL_FP01, CalcSumArrayTest) {
 	EXPECT_EQ("1,1;5,3;11,3;16,1;20,3;24,3;31,1;35,1;41,0;",calcSum(sequence2, 9));
 }
 
+TEST(CAL_FP01, Benchmark) {
+	benchmark();
+}
+
 
 TEST(CAL_FP01, PartitioningTest) {
 	EXPECT_EQ(3025,s_recursive(9,3));

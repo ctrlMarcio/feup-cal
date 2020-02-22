@@ -23,4 +23,15 @@ using namespace std;
  */
 string calcSum(int* sequence, int size);
 
+/*
+ * Testa extensivamente o algoritmo, exportando um csv com duas colunas, uma onde estará o numero de elementos do array
+ * e outra com a média de tempo para o numero dado.
+ *
+ * Argumentos:
+ *  name - Nome do csv
+ *  maxSize - Tamanho máximo do array ao qual a soma será aplicada
+ *  qtMeasurements - Quantidade de medições feita para cada array
+ */
+void benchmark(string name="sum.csv", int maxSize=500, int qtMeasurements=1000);
+
 #endif /* SUM_H_ */
