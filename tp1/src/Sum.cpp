@@ -16,9 +16,9 @@ void freeValues(int size, int *const *values);
  * Creates an array of arrays of values that sums all the values from the bottom up, saving the best index and best sum.
  *
  * Example, for sequence = {4, 7, 2, 8, 1},
- * 	index =		0	1	2	3	4 |	ind, sum
- *				---------------------------------------
- *  values = 	4	7	2	8	1 |	4, 1
+ * 	index =		0	1	2	3	4 | ind, sum
+ *			-----------------------------------------------
+ *	values = 	4	7	2	8	1 | 4, 1
  *  			11	9	10	9	  | 1, 9
  *  			13	17	11		  | 2, 11
  *  			21	18			  | 1, 18
@@ -27,8 +27,8 @@ void freeValues(int size, int *const *values);
  * It fills the first line with the exact same values of the sequence vector.
  * From then on, fills summing the value immediately above with the basic value right after.
  * The value 	11 in the second line is the sum of 4 and 7.
- * 				13 = 11 + 2 (2 is after 7, the last value of 11)
- * 				21 = 13 + 8 and so on.
+ * 		13 = 11 + 2 (2 is after 7, the last value of 11)
+ * 		21 = 13 + 8 and so on.
  *
  * ⚠ Big BIG documentation so I don't forget what I've done when I come back to study lmao ⚠
  */
