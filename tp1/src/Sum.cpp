@@ -6,13 +6,19 @@
 #include <chrono>
 #include <fstream>
 
-string &fillFirstIteration(const int *sequence, int size, int **values, string &res);
+string &fillFirstIteration(const int *sequence, int size, int *values, string &res);
 
-void updateValues(int *const *values, int iteration, int qtNumbers, int &bestIndex, int &bestSum);
+void updateValues(int *values, int iteration, int qtNumbers, int &bestIndex, int &bestSum);
 
 void freeValues(int size, int *const *values);
 
+int getSum(const int *sequence, int iteration, int amount);
+
+string buildResString(int size, const int *bestSums, const int *bestIndexes);
+
 /*
+ * ALTERNATIVE METHOD: less efficient spatially.
+ *
  * Creates an array of arrays of values that sums all the values from the bottom up, saving the best index and best sum.
  *
  * Example, for sequence = {4, 7, 2, 8, 1},
@@ -32,8 +38,8 @@ void freeValues(int size, int *const *values);
  *
  * ⚠ Big BIG documentation so I don't forget what I've done when I come back to study lmao ⚠
  */
-string calcSum(int *sequence, int size) {
-	int *values[size]; // array of arrays that hold the sum of all the values
+string calcSum2(int *sequence, int size) {
+	int values[size];
 	string res;
 
 	res = fillFirstIteration(sequence, size, values, res);
@@ -43,16 +49,51 @@ string calcSum(int *sequence, int size) {
 		int bestSum = std::numeric_limits<int>::max();
 
 		int qtNumbers = size - iteration;
-		values[iteration] = (int*)malloc(sizeof(int) * qtNumbers);
 
 		updateValues(values, iteration, qtNumbers, bestIndex, bestSum);
 
 		res += to_string(bestSum) + "," + to_string(bestIndex) + ";";
 	}
 
-	freeValues(size, values);
-
 	return res;
+}
+
+string calcSum(int *sequence, int size) {
+    int bestSums[size];
+    int bestIndexes[size];
+
+    for (int iteration = 0; iteration < size; ++iteration) {
+        int bestIndex = 0;
+        int bestSum = std::numeric_limits<int>::max();
+
+        for (int i = 0; i < size - iteration; ++i) {
+            int sum = getSum(sequence, iteration, i);
+
+            if (sum < bestSum) {
+                bestSum = sum;
+                bestIndex = i;
+            }
+        }
+
+        bestSums[iteration] = bestSum;
+        bestIndexes[iteration] = bestIndex;
+    }
+
+    return buildResString(size, bestSums, bestIndexes);
+}
+
+string buildResString(int size, const int *bestSums, const int *bestIndexes) {
+    string res = "";
+    for (int i = 0; i < size; ++i)
+        res += to_string(bestSums[i]) + "," + to_string(bestIndexes[i]) + ";";
+    return res;
+}
+
+int getSum(const int *sequence, int iteration, int amount) {
+    int sum = 0;
+    for (int j = 0; j <= iteration; ++j)
+        sum += sequence[amount + j];
+    return sum;
 }
 
 void benchmark(string name, int maxSize, int qtMeasurements) {
@@ -88,29 +129,23 @@ void benchmark(string name, int maxSize, int qtMeasurements) {
 	file.close();
 }
 
-void freeValues(int size, int *const *values) {
-	for (int i = 0; i < size; ++i)
-		free(values[i]);
-}
-
-void updateValues(int *const *values, int iteration, int qtNumbers, int &bestIndex, int &bestSum) {
+void updateValues(int *values, int iteration, int qtNumbers, int &bestIndex, int &bestSum) {
 	for (int i = 0; i < qtNumbers; i++) {
-		values[iteration][i] = values[iteration - 1][i] + values[0][iteration + i];
+		values[i] = values[i] + values[iteration + i];
 
-		if (i == 0 || values[iteration][i] < bestSum) {
+		if (i == 0 || values[i] < bestSum) {
 			bestIndex = i;
-			bestSum = values[iteration][i];
+			bestSum = values[i];
 		}
 	}
 }
 
-string &fillFirstIteration(const int *sequence, int size, int **values, string &res) {
-	values[0] = (int*)malloc(sizeof(int) * size);
+string &fillFirstIteration(const int *sequence, int size, int *values, string &res) {
 	int bestIndex = 0;
 	int bestSum = numeric_limits<int>::max();
 
 	for (int i = 0; i < size; ++i) {
-		values[0][i] = sequence[i];
+		values[i] = sequence[i];
 		if (sequence[i] < bestSum) {
 			bestIndex = i;
 			bestSum = sequence[i];

@@ -48,7 +48,7 @@ TEST(CAL_FP01, CalcSumArrayTest) {
 }
 
 TEST(CAL_FP01, Benchmark) {
-	benchmark();
+	//benchmark();
 }
 
 
