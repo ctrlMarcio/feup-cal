@@ -148,3 +148,7 @@ lib/
 
 ### IDE files ###
 .idea/
+
+
+lib/
+.idea/
