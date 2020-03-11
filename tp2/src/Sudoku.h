@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <set>
+
 using namespace std;
 
 #define IllegalArgumentException -1
@@ -32,7 +34,23 @@ class Sudoku
 	bool lineHasNumber[9][10];
 	bool block3x3HasNumber[3][3][10];
 
+	/**
+	 * Gets the possible solutions for the cell in the position i, j
+	 * @param i
+	 * @param j
+	 * @return the possible solutions
+	 */
+	std::set<int> getPossibilities(int i, int j);
+
 	void initialize();
+
+	/**
+	 * Gets the best cell to fill, "greedly", filling as well a set of possibilities to that cell.
+	 *
+	 * @param possibilities the set of possibilities
+	 * @return the pair of the best cell {x, y}
+	 */
+	std::pair<int, int> getBestCell(std::set<int> &possibilities);
 
 public:
 	/** Inicia um Sudoku vazio.
@@ -66,6 +84,8 @@ public:
 	 * Retorna indicação de sucesso ou insucesso (sudoku impossível).
 	 */
 	bool solve();
+
+	bool solve2();
 
 
 	/**
