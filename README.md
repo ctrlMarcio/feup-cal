@@ -5,6 +5,7 @@ Exercises solved during the [Algorithm Design and Analysis](https://sigarra.up.p
 ## Requirements
 
 * [Googletest - Google C++ testing framework](https://github.com/google/googletest). To download it, simply clone the repo from GitHub. More info on its place below.
+* [TP3 files](https://drive.google.com/drive/folders/1k3QTsRO_aSxWfCglEnfmmDX_0-Gr0Fy2?usp=sharing). Required files to test TP3.
 
 ## Compile and run
 
