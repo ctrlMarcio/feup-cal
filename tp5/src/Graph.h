@@ -41,6 +41,8 @@ class Vertex {
 
 	void addEdge(Vertex<T> *dest, double w);
 
+	double weightTo(Vertex<T> *dest);
+
 public:
 	Vertex(T in);
 
@@ -89,6 +91,18 @@ Vertex<T> *Vertex<T>::getPath() const {
 	return this->path;
 }
 
+template<class T>
+double Vertex<T>::weightTo(Vertex<T> *dest) {
+	for (Edge<T> edge : this->adj)
+		if (edge.dest == dest)
+			return edge.weight;
+
+	if (this == dest)
+		return 0;
+
+	return INF;
+}
+
 /********************** Edge  ****************************/
 
 template<class T>
@@ -112,9 +126,12 @@ Edge<T>::Edge(Vertex<T> *d, double w): dest(d), weight(w) {}
 template<class T>
 class Graph {
 	vector<Vertex<T> *> vertexSet;    // vertex set
+	vector<vector<double>> distancesMatrix;
+	vector<vector<int>> pathMatrix;
 
 public:
 	Vertex<T> *findVertex(const T &in) const;
+	int findVertexIndex(Vertex<T> *vertex) const;
 
 	bool addVertex(const T &in);
 
@@ -149,6 +166,8 @@ vector<Vertex<T> *> Graph<T>::getVertexSet() const {
 
 /*
  * Auxiliary function to find a vertex with a given content.
+ *
+ * returns null if the vertex does not exist
  */
 template<class T>
 Vertex<T> *Graph<T>::findVertex(const T &in) const {
@@ -156,6 +175,19 @@ Vertex<T> *Graph<T>::findVertex(const T &in) const {
 		if (v->info == in)
 			return v;
 	return NULL;
+}
+
+/*
+ * Auxiliary function to find a vertex index.
+ *
+ * returns -1 if the vertex does not exist
+ */
+template<class T>
+int Graph<T>::findVertexIndex(Vertex<T> *vertex) const {
+	for (int i = 0; i < vertexSet.size(); ++i)
+		if (vertexSet[i] == vertex)
+			return i;
+	return -1;
 }
 
 /*
@@ -234,7 +266,7 @@ void Graph<T>::dijkstraShortestPath(const T &origin) {
 	MutablePriorityQueue<Vertex<T> > priority_queue;
 	priority_queue.insert(current);
 
-	while(!priority_queue.empty()) {
+	while (!priority_queue.empty()) {
 		Vertex<T> *v = priority_queue.extractMin();
 
 		for (Edge<T> &edge : v->adj) {
@@ -256,7 +288,34 @@ void Graph<T>::dijkstraShortestPath(const T &origin) {
 
 template<class T>
 void Graph<T>::bellmanFordShortestPath(const T &orig) {
-	// TODO
+	Vertex<T> *start = findVertex(orig);
+	if (start == NULL)
+		return;
+
+	for (Vertex<T> *v : vertexSet) {
+		v->dist = INF;
+		v->path = NULL;
+	}
+
+	start->dist = 0;
+
+	for (int i = 0; i < vertexSet.size() - 1; ++i) {
+		for (Vertex<T> *vertex : vertexSet) {
+			for (Edge<T> edge : vertex->adj) {
+				if (edge.dest->dist > vertex->dist + edge.weight) {
+					edge.dest->dist = vertex->dist + edge.weight;
+					edge.dest->path = vertex;
+				}
+			}
+		}
+	}
+
+	for (Vertex<T> *vertex : vertexSet) {
+		for (Edge<T> edge : vertex->adj) {
+			if (vertex->dist + edge.weight < edge.dest->dist)
+				cerr << "The graph has negative weights" << endl;
+		}
+	}
 }
 
 
@@ -277,7 +336,7 @@ vector<T> Graph<T>::getPathTo(const T &dest) const {
 		current = previous;
 	}
 
-	while(!stack.empty()) {
+	while (!stack.empty()) {
 		res.push_back(stack.top()->getInfo());
 		stack.pop();
 	}
@@ -290,13 +349,67 @@ vector<T> Graph<T>::getPathTo(const T &dest) const {
 
 template<class T>
 void Graph<T>::floydWarshallShortestPath() {
-	// TODO
+	// prepares the matrices, k = 0 if you will
+	distancesMatrix.clear();
+	pathMatrix.clear();
+
+	for (int i = 0; i < vertexSet.size(); ++i) {
+		vector<double> distances;
+		vector<int> paths;
+
+		for (Vertex<T> *dst : vertexSet) {
+			double weight = (vertexSet[i]->weightTo(dst));
+			distances.push_back(weight);
+
+			if (weight != INF)
+				paths.push_back(i);
+			else
+				paths.push_back(-1);
+		}
+
+		distancesMatrix.push_back(distances);
+		pathMatrix.push_back(paths);
+	}
+
+	for (int k = 0; k < vertexSet.size(); ++k) {
+		for (int i = 0; i < vertexSet.size(); ++i) { // for each line
+
+			if (distancesMatrix[i][k] == INF)
+				continue;
+
+			for (int j = 0; j < vertexSet.size(); ++j) { // for each column
+				if (distancesMatrix[k][j] != INF && distancesMatrix[i][k] + distancesMatrix[k][j] < distancesMatrix[i][j]) {
+					distancesMatrix[i][j] = distancesMatrix[i][k] + distancesMatrix[k][j];
+					pathMatrix[i][j] = pathMatrix[k][j];
+				}
+			}
+		}
+	}
 }
 
 template<class T>
 vector<T> Graph<T>::getfloydWarshallPath(const T &orig, const T &dest) const {
 	vector<T> res;
-	// TODO
+	Vertex<T> *begin = findVertex(orig);
+	Vertex<T> *end = findVertex(dest);
+
+	int beginIdx = findVertexIndex(begin);
+	if (beginIdx == -1)
+		return res;
+
+	int endIdx = findVertexIndex(end);
+	if (endIdx == -1)
+		return res;
+
+	if (distancesMatrix[beginIdx][endIdx] == INF)
+		return res;
+
+	while(endIdx != beginIdx) {
+		res.insert(res.begin(), vertexSet[endIdx]->info);
+		endIdx = pathMatrix[beginIdx][endIdx];
+	}
+	res.insert(res.begin(), vertexSet[endIdx]->info); // end == begin
+
 	return res;
 }
 
