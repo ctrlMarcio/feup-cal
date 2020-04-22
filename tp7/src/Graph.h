@@ -489,7 +489,7 @@ vector<Vertex<T> *> Graph<T>::calculateKruskal() {
 
 	while (res.size() != vertexSet.size()) {
 		Edge<T> best = queue.top();
-		while (best.orig->visited && best.dest->visited) {
+		while (best.dest->path || best.orig->visited && best.dest->visited) {
 			queue.pop();
 			best = queue.top();
 		}
